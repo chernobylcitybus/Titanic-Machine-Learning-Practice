@@ -90,7 +90,7 @@ for i in df_cat.columns:
 ![Graph20](https://i.imgur.com/JfylLgL.png)  
 
 ## Feature Engineering: 
-### The Cabin Catastrophe:  
+### The Cabin Catastrophe and Title Turmoil!  
 
 The 'Cabin' variable had a lot of null values, and was very messy. I wanted to know if Cabin letter or how many people were in the cabin affected survival rate. So first I got the value counts for the number of cabins with different amount of people in them:
 
@@ -99,11 +99,11 @@ train['cabin_multiple'] = train.Cabin.apply(lambda x: 0 if pd.isna(x) else len(x
 
 train['cabin_multiple'].value_counts()
 ```
->0 ------------ 687  
->1 ------------ 180  
->2 ------------ 16  
->3 ------------ 6  
->4 ------------ 2    
+>0 ------------ 687    
+>1 ------------ 180    
+>2 ------------ 16    
+>3 ------------ 6    
+>4 ------------ 2      
 >Name: cabin_multiple, dtype: int64
 
 Next I made a table to see if these numbers were related to survival rate at all:
@@ -127,17 +127,16 @@ train['cabin_adv'] = train.Cabin.apply(lambda x: str(x)[0])
 print(train.cabin_adv.value_counts())
 pd.pivot_table(train, index='Survived', columns='cabin_adv', values='Name', aggfunc='count')
 ```
->n ---- 687
->C ---- 59
->B ---- 47
->D ---- 33
->E ---- 32
->A ---- 15
->F ---- 13
->G ---- 4
->T ---- 1  
->Name: cabin_adv, dtype: int64
-Out[48]:
+>n ---- 687  
+>C ---- 59  
+>B ---- 47  
+>D ---- 33  
+>E ---- 32  
+>A ---- 15  
+>F ---- 13  
+>G ---- 4  
+>T ---- 1    
+>Name: cabin_adv, dtype: int64  
 
 | Letter | Died | Survived |
 | ------ | ---- | -------- |
@@ -206,16 +205,17 @@ sns.catplot(x="Sex", y="Survived", kind="bar", data=train)
 sns.catplot(x="FamilySize", y="Survived", kind="bar", data=train)
 sns.catplot(x="Survived", y="Age", hue="Sex", kind="swarm", data=train)
 ``` 
-![Graph21](https://i.imgur.com/uAuziLm.png)  
-![Graph21](https://i.imgur.com/eUmD72F.png)  
-![Graph21](https://i.imgur.com/d1U7MNw.png)
-Then I was done playin' around, so I unleashed the GRAPH KING:
+![Graph21](https://i.imgur.com/uAuziLm.png)    
+![Graph21](https://i.imgur.com/eUmD72F.png)    
+![Graph21](https://i.imgur.com/d1U7MNw.png)  
+
+Then I was done playin' around, so I unleashed the GRAPH KING:  
 ```
 #ALL THE DATA!
 pp = sns.pairplot(train, hue = 'Survived', palette = 'deep', size=1.2, diag_kind = 'kde', diag_kws=dict(shade=True), plot_kws=dict(s=10) )
 pp.set(xticklabels=[])
 ```
-![Graph6](https://i.imgur.com/uUKdGiS.png)  
+![Graph6](https://i.imgur.com/uUKdGiS.png)    
 
 Finally, I created another heatmap with my new features, including the percentage correlation numbers:
 ```
@@ -241,7 +241,7 @@ correlation_heatmap(train)
 ```
 ![Graph7](https://i.imgur.com/qFiTpSE.png)
 
-## Step 3: Encoding  
+## Step 4: Encoding  
 
 Here I created the categorical variables from earlier, log transformed the 'Fare' feature to a more normal distribution, converted 'Pclass' to a category, and created the dummy variables of all the categories: 
 ```
@@ -283,7 +283,7 @@ X_test_scaled = all_dummies_scaled[all_dummies_scaled.train_test == 0].drop(['tr
 y_train = all_data[all_data.train_test==1].Survived
 ```
 
-## Step 6: Model Building!
+## Step 5: Model Building!
 
 The main purpose of working on this project was to learn model building and model tuning, as well as ensembling methods. I used Naive Bayes, Logistic Regression, Decision Tree, K Nearest Neighbour, Random Forest, Support Vector Classifier, and Xtreme Gradient Boosting:
 
@@ -423,7 +423,7 @@ print(cv.mean())
 >0.82681564, 0.81460674, 0.8258427,  0.80337079, 0.87078652    
 >0.8282844768062269  
 
-## Model Tuning!
+## Step 6: Model Tuning!
 
 Next I wanted to tune the models to get a more accurate prediction. I used GridSearchCV and RandomizedSearchCV for this:
 ```
