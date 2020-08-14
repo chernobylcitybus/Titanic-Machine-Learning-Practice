@@ -60,7 +60,10 @@ for i in df_num.columns:
     plt.title(i)
     plt.show()
 ```
-![Graph11]()
+![Graph11](https://i.imgur.com/XIBawt4.png)  
+![Graph12](https://i.imgur.com/ENmu0rX.png)  
+![Graph13](https://i.imgur.com/XaSM5eN.png)  
+![Graph14](https://i.imgur.com/2q3sQlI.png)  
 
 Then I got the correlation heatmap to see how the different variables interacted:
 ```
@@ -70,7 +73,7 @@ plt.subplots(figsize=(12,9))
 sns.heatmap(corrmat, vmax=0.9, square=True)
 plt.show()
 ```
-![Graph1]()
+![Graph15](https://i.imgur.com/wwN65E4.png)  
 
 This showed that the 'Age' and 'Fare' features are most correlated with the 'Pclass' feature, so grouping these features and then getting the median will get a more accurate result to replace the null values.
 
@@ -80,10 +83,14 @@ for i in df_cat.columns:
     sns.barplot(df_cat[i].value_counts().index,df_cat[i].value_counts()).set_title(i)
     plt.show()   
 ```
-![Graph]()
+![Graph16](https://i.imgur.com/7tESTT9.png)  
+![Graph17](https://i.imgur.com/5C22isQ.png)  
+![Graph18](https://i.imgur.com/OPDBMfm.png)  
+![Graph19](https://i.imgur.com/hJuqM6M.png)  
+![Graph20](https://i.imgur.com/JfylLgL.png)  
 
 ## Feature Engineering: 
-### The Cabin Catastrophe:
+### The Cabin Catastrophe:  
 
 The 'Cabin' variable had a lot of null values, and was very messy. I wanted to know if Cabin letter or how many people were in the cabin affected survival rate. So first I got the value counts for the number of cabins with different amount of people in them:
 
@@ -199,13 +206,16 @@ sns.catplot(x="Sex", y="Survived", kind="bar", data=train)
 sns.catplot(x="FamilySize", y="Survived", kind="bar", data=train)
 sns.catplot(x="Survived", y="Age", hue="Sex", kind="swarm", data=train)
 ``` 
+![Graph21](https://i.imgur.com/uAuziLm.png)  
+![Graph21](https://i.imgur.com/eUmD72F.png)  
+![Graph21](https://i.imgur.com/d1U7MNw.png)
 Then I was done playin' around, so I unleashed the GRAPH KING:
 ```
 #ALL THE DATA!
 pp = sns.pairplot(train, hue = 'Survived', palette = 'deep', size=1.2, diag_kind = 'kde', diag_kws=dict(shade=True), plot_kws=dict(s=10) )
 pp.set(xticklabels=[])
 ```
-![Graph6]()  
+![Graph6](https://i.imgur.com/uUKdGiS.png)  
 
 Finally, I created another heatmap with my new features, including the percentage correlation numbers:
 ```
@@ -229,7 +239,7 @@ def correlation_heatmap(df):
 
 correlation_heatmap(train)
 ```
-![Graph7]()
+![Graph7](https://i.imgur.com/qFiTpSE.png)
 
 ## Step 3: Encoding  
 
