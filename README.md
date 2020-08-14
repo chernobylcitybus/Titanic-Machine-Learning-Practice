@@ -23,15 +23,18 @@ sns.set_style('darkgrid')
 train = pd.read_csv('C:/Users/Luke/Downloads/titanic/train.csv')
 test = pd.read_csv('C:/Users/Luke/Downloads/titanic/test.csv')
 
-train_copy = train.copy(deep = True)
+train['train_test'] = 1
+test['train_test'] = 0
+test['Survived'] = np.NaN
+all_data = pd.concat([train, test])
 
-data_cleaner = [train_copy, test]
+all_data.columns
 ```
 ## Step 1: Cleaning the data by removing/filling null values  
 
 Checked for null values:
 ```
-print('Train columns with null values:\n', train_copy.isnull().sum())
+print('Train columns with null values:\n', train.isnull().sum())
 print("---------------")
 
 print('Test columns with null values:\n', test.isnull().sum())
@@ -42,7 +45,24 @@ train.describe(include = "all")
 Gave us 177 - Age, 687 - Cabin, 2 - Embarked null values in the train dataset, and  
 86 - Age, 1 - Fare, 327 - Cabin null values in the test dataset  
 
-To fill these null values I could have filled them with their respective median/mode values, but I wanted a more accurate result, so first I graphed a correlation heatmap:
+Then I separated the numeric and categorical variables:
+```
+#Separate numeric and categorical variables
+
+df_num = train[['Age', 'SibSp', 'Parch', 'Fare']]
+df_cat = train[['Survived', 'Pclass', 'Sex', 'Ticket', 'Cabin', 'Embarked']]
+```
+And the distributions of the numeric variables:
+```
+#distributions for numeric variables 
+for i in df_num.columns:
+    plt.hist(df_num[i])
+    plt.title(i)
+    plt.show()
+```
+![Graph11]()
+
+Then I got the correlation heatmap to see how the different variables interacted:
 ```
 #Correlation map to see how features are correlated with Survived and with each other
 corrmat = train.corr()
@@ -50,129 +70,142 @@ plt.subplots(figsize=(12,9))
 sns.heatmap(corrmat, vmax=0.9, square=True)
 plt.show()
 ```
-![Graph1](https://i.imgur.com/70yQTkP.png)
+![Graph1]()
 
-This showed that the 'Age' and 'Fare' features are most correlated with the 'Pclass' feature, so grouping these features and then getting the median will get a more accurate result. The 'Cabin' feature has too much data missing for an accurate result, so I dropped it.
+This showed that the 'Age' and 'Fare' features are most correlated with the 'Pclass' feature, so grouping these features and then getting the median will get a more accurate result to replace the null values.
+
+Next I did some box plots for the categorical variables:
+```
+for i in df_cat.columns:
+    sns.barplot(df_cat[i].value_counts().index,df_cat[i].value_counts()).set_title(i)
+    plt.show()   
+```
+![Graph]()
+
+## Feature Engineering: 
+### The Cabin Catastrophe:
+
+The 'Cabin' variable had a lot of null values, and was very messy. I wanted to know if Cabin letter or how many people were in the cabin affected survival rate. So first I got the value counts for the number of cabins with different amount of people in them:
+
+```
+train['cabin_multiple'] = train.Cabin.apply(lambda x: 0 if pd.isna(x) else len(x.split(' ')))
+
+train['cabin_multiple'].value_counts()
+```
+>0 ------------ 687  
+>1 ------------ 180  
+>2 ------------ 16  
+>3 ------------ 6  
+>4 ------------ 2    
+>Name: cabin_multiple, dtype: int64
+
+Next I made a table to see if these numbers were related to survival rate at all:
+```
+pd.pivot_table(train, index = 'Survived', columns = 'cabin_multiple', values = 'Ticket', aggfunc = 'count')
+```
+| Num | Died | Survived |  
+| --- | ---- | -------- |
+| 0 | 481.0 | 206.0 |
+| 1 | 58.0 | 122.0 |
+| 2 | 7.0 | 9.0 |
+| 3 | 3.0 | 3.0 |
+| 4 | NaN | 2.0 | 
+
+Turns out having multiple people in a cabin actually helps with survival a lot!
+
+Next to find out if the Cabin letters have anything to do with survival:
+```
+train['cabin_adv'] = train.Cabin.apply(lambda x: str(x)[0])
+#n = null
+print(train.cabin_adv.value_counts())
+pd.pivot_table(train, index='Survived', columns='cabin_adv', values='Name', aggfunc='count')
+```
+>n ---- 687
+>C ---- 59
+>B ---- 47
+>D ---- 33
+>E ---- 32
+>A ---- 15
+>F ---- 13
+>G ---- 4
+>T ---- 1  
+>Name: cabin_adv, dtype: int64
+Out[48]:
+
+| Letter | Died | Survived |
+| ------ | ---- | -------- |
+| A | 8.0 | 7.0 |
+| B | 12.0 | 35.0 |
+| C | 24.0 | 35.0 |
+| D | 8.0 | 25.0 |
+| E | 8.0 | 24.0 | 
+| F | 5.0 | 8.0 |
+| G | 2.0 | 2.0 |
+| T | 1.0 | NaN |
+| Null | 481.0 | 206.0 |
+
+So simply having cabin data correlates to a higher survival rate.
+
+Next I filled in the missing values for Age, Embarked, and Fare. For Age and Fare I grouped by Pclass (according to the heatmap it is the variable that most correlates) for a more accurate prediction:
 
 ```
 #Filling in or removing missing values in train and test datasets
-#Age and Pclass are most related, so will fill in Age with the median wrt. Pclass
 
-for dataset in data_cleaner:
-    #Age and Pclass are most related, so will group by Pclass and then get the median age
-    dataset['Age'] = dataset.groupby('Pclass')['Age'].transform(lambda x: x.fillna(x.median()))
-   
-    dataset['Embarked'].fillna(dataset['Embarked'].mode()[0], inplace = True)
+#Age and Pclass are most related, so will group by Pclass and then get the median age
+all_data.Age = all_data.groupby('Pclass')['Age'].transform(lambda x: x.fillna(x.mean()))
     
-    #Fare and Pclass are most related, so once again groupby & get median
-    dataset['Fare'] = dataset.groupby('Pclass')['Fare'].transform(lambda x: x.fillna(x.median()))
+all_data.Embarked.fillna(all_data.Embarked.mode()[0], inplace = True)
     
+#Fare and Pclass are most related, so once again groupby & get median
+all_data.Fare = all_data.groupby('Pclass')['Fare'].transform(lambda x: x.fillna(x.median()))
+
 #delete the useless columns
-drop_column = ['PassengerId','Cabin', 'Ticket']
-train_copy.drop(drop_column, axis=1, inplace = True)
+drop_column = ['PassengerId', 'Ticket']
+train.drop(drop_column, axis=1, inplace = True)
+
+print(all_data.isnull().sum())
+print("--------------")
+print(test.isnull().sum())
 ```
 ## Step 2: Adding some new features:  
 
-I created 5 new features.   
+I created some new features.   
 Firstly I created a 'FamilySize' feature by combining the Sibling Size and Parent Size features (+1).  
 Secondly, I created the 'IsAlone' feature to show if the person was on the ship alone or not.  
-Thirdly, I split the much less useful 'Name' feature to show just the person's title, as this is actually correlated to whether or not the person survived, unlike the 'name' feature. I also grouped the rarer titles into an 'Other' category.
-Fourth and Fifthly, I created 'Fare' and 'Age' bins to make some later analysis a bit easier.  
+Thirdly, I split the much less useful 'Name' feature to show just the person's title, as this is actually correlated to whether or not the person survived, unlike the 'name' feature. I also grouped the rarer titles into an 'Other' category. 
 
 ```
 #Creating new features
-for dataset in data_cleaner:    
-    #Getting FamilySize from Sibling and Parent counts
-    dataset['FamilySize'] = dataset ['SibSp'] + dataset['Parch'] + 1
+#Getting FamilySize from Sibling and Parent counts
+all_data['FamilySize'] = all_data['SibSp'] + all_data['Parch'] + 1
 
-    dataset['IsAlone'] = 1 
-    dataset['IsAlone'].loc[dataset['FamilySize'] > 1] = 0
+all_data['IsAlone'] = 1 
+all_data['IsAlone'].loc[all_data['FamilySize'] > 1] = 0
 
-    dataset['Title'] = dataset['Name'].str.split(", ", expand=True)[1].str.split(".", expand=True)[0]
+all_data['Title'] = all_data['Name'].str.split(", ", expand=True)[1].str.split(".", expand=True)[0]
 
-    dataset['FareBin'] = pd.qcut(dataset['Fare'], 4)
-
-    dataset['AgeBin'] = pd.cut(dataset['Age'].astype(int), 5)
-    
 #Group rare title names into "Other"
 stat_min = 10 
-title_names = (train_copy['Title'].value_counts() < stat_min) 
+title_names = (all_data['Title'].value_counts() < stat_min) 
 
-train_copy['Title'] = train_copy['Title'].apply(lambda x: 'Other' if title_names.loc[x] == True else x)
+all_data['Title'] = all_data['Title'].apply(lambda x: 'Other' if title_names.loc[x] == True else x)
+print(all_data['Title'].value_counts())
 ```
-## Step 3: Encoding  
+## Step 3: Fun Graph Time!
 
-Here I used LabelEncoder() to convert the objects to categories for train and test datasets.  
-I also defined the target variable ('Survived') that I needed to predict, the feature variables that I wanted to select from, and the x variable with bin features.  
+I created some cat plots of the new features (& some others) to see how they relate to survival:
 ```
-#Converting data with Label Encoder
-
-label = LabelEncoder()
-for dataset in data_cleaner:    
-    dataset['Sex_Code'] = label.fit_transform(dataset['Sex'])
-    dataset['Embarked_Code'] = label.fit_transform(dataset['Embarked'])
-    dataset['Title_Code'] = label.fit_transform(dataset['Title'])
-    dataset['AgeBin_Code'] = label.fit_transform(dataset['AgeBin'])
-    dataset['FareBin_Code'] = label.fit_transform(dataset['FareBin'])
-
-#Defining the variable we want to predict
-Target = ['Survived']
-
-#Defining all the X (feature) variables that we want to select from
-train_copy_x = ['Sex','Pclass', 'Embarked', 'Title','SibSp', 'Parch', 'Age', 'Fare', 'FamilySize', 'IsAlone'] 
-train_copy_x_calc = ['Sex_Code','Pclass', 'Embarked_Code', 'Title_Code','SibSp', 'Parch', 'Age', 'Fare'] 
-train_copy_xy =  Target + train_copy_x
-print('Original X Y: ', train_copy_xy, '\n')
-
-#define x variables with bin features 
-train_copy_x_bin = ['Sex_Code','Pclass', 'Embarked_Code', 'Title_Code', 'FamilySize', 'AgeBin_Code', 'FareBin_Code']
-train_copy_xy_bin = Target + train_copy_x_bin
-print('Bin X Y: ', train_copy_xy_bin, '\n')
-```
->Original X Y:  ['Survived', 'Sex', 'Pclass', 'Embarked', 'Title', 'SibSp', 'Parch', 'Age', 'Fare', 'FamilySize', 'IsAlone']    
->Bin X Y:  ['Survived', 'Sex_Code', 'Pclass', 'Embarked_Code', 'Title_Code', 'FamilySize', 'AgeBin_Code', 'FareBin_Code']  
-
-## Step 4: Splitting  
-
-Next I used sklearn's train_test_split() function to split the test data to avoid overfitting:
-```
-train1_x, test1_x, train1_y, test1_y = model_selection.train_test_split(train_copy[train_copy_x_calc], train_copy[Target], random_state = 0)
-train1_x_bin, test1_x_bin, train1_y_bin, test1_y_bin = model_selection.train_test_split(train_copy[train_copy_x_bin], train_copy[Target] , random_state = 0)
-```
-## Step 5: Fun Graph Time!
-
-Next up it was time to get a better look at the data and see how all the variables fit together!  
-First up, I made bar, point, and cat plots to see how some of the features correlated to our target variable ('Survived')  
-
-```
-#graph individual features by survival
-fig, saxis = plt.subplots(2, 3,figsize=(16,12))
-
-sns.barplot(x = 'Embarked', y = 'Survived', data=train_copy, ax = saxis[0,0])
-sns.barplot(x = 'Pclass', y = 'Survived', order=[1,2,3], data=train_copy, ax = saxis[0,1])
-sns.barplot(x = 'IsAlone', y = 'Survived', order=[1,0], data=train_copy, ax = saxis[0,2])
-
-sns.pointplot(x = 'FareBin', y = 'Survived',  data=train_copy, ax = saxis[1,0])
-sns.pointplot(x = 'AgeBin', y = 'Survived',  data=train_copy, ax = saxis[1,1])
-sns.pointplot(x = 'FamilySize', y = 'Survived', data=train_copy, ax = saxis[1,2])
-
-sns.catplot(x="Sex", y="Survived", kind="bar", data=train_copy)
-sns.catplot(x="FamilySize", y="Survived", kind="bar", data=train_copy)
-
-sns.catplot(x="Survived", y="Age", hue="Sex", kind="swarm", data=train_copy)
-```
-![Graph2](https://i.imgur.com/VJBctt3.png)  
-![Graph3](https://i.imgur.com/6ZqPGjg.png)  
-![Graph4](https://i.imgur.com/dBlHZQJ.png)  
-![Graph5](https://i.imgur.com/a1aq1nE.png)  
-
-I was done playin' around, so I unleashed the GRAPH KING:
+sns.catplot(x="Sex", y="Survived", kind="bar", data=train)
+sns.catplot(x="FamilySize", y="Survived", kind="bar", data=train)
+sns.catplot(x="Survived", y="Age", hue="Sex", kind="swarm", data=train)
+``` 
+Then I was done playin' around, so I unleashed the GRAPH KING:
 ```
 #ALL THE DATA!
-pp = sns.pairplot(train_copy, hue = 'Survived', palette = 'deep', size=1.2, diag_kind = 'kde', diag_kws=dict(shade=True), plot_kws=dict(s=10) )
+pp = sns.pairplot(train, hue = 'Survived', palette = 'deep', size=1.2, diag_kind = 'kde', diag_kws=dict(shade=True), plot_kws=dict(s=10) )
 pp.set(xticklabels=[])
 ```
-![Graph6](https://i.imgur.com/u0CJX5n.png)  
+![Graph6]()  
 
 Finally, I created another heatmap with my new features, including the percentage correlation numbers:
 ```
@@ -194,51 +227,218 @@ def correlation_heatmap(df):
     
     plt.title('Correlation Heatmap', y=1.05, size=15)
 
-correlation_heatmap(train_copy)
+correlation_heatmap(train)
 ```
-![Graph7](https://i.imgur.com/ceJFews.png)
+![Graph7]()
 
-## Step 6: Machine Learning:
+## Step 3: Encoding  
 
-I decided to use the Random Forest model, mainly because I hadn't used it yet and wanted to figure out how it worked. Later on I tried LinearSVC, as recommended by sklearn's handy dandy flowchart:
-![Graph8](https://scikit-learn.org/stable/_static/ml_map.png)
-
+Here I created the categorical variables from earlier, log transformed the 'Fare' feature to a more normal distribution, converted 'Pclass' to a category, and created the dummy variables of all the categories: 
 ```
-random_forest = RandomForestClassifier(n_estimators=100, criterion='entropy', max_depth=6, random_state=0)
-random_forest.fit(train_copy[train_copy_x_bin], train_copy[Target])
-Y_pred = random_forest.predict(test[train_copy_x_bin])
-test['Survived'] = Y_pred
-random_forest.score(train_copy[train_copy_x_bin], train_copy[Target])
-acc_random_forest = round(random_forest.score(train_copy[train_copy_x_bin], train_copy[Target]) * 100, 2)
-acc_random_forest
-```
->85.19
+all_data['cabin_multiple'] = all_data.Cabin.apply(lambda x: 0 if pd.isna(x) else len(x.split(' ')))
+all_data['cabin_adv'] = all_data.Cabin.apply(lambda x: str(x)[0])
+       
+# log transform of fare
+all_data['norm_fare'] = np.log(all_data.Fare+1)
+all_data['norm_fare'].hist()
 
-RandomForest gave an accuracy score of 85.19% -- not bad!
 
-LinearSVC:
+all_data.Pclass = all_data.Pclass.astype(str)
+
+all_dummies = pd.get_dummies(all_data[['Pclass','Sex','Age','FamilySize','IsAlone','SibSp','Parch','norm_fare','Embarked','cabin_adv','cabin_multiple','Title','train_test']])
 ```
-from sklearn.pipeline import make_pipeline
+Then I split the data to run the models on and avoid overfitting:
+```
+#Splitting data to train test
+
+X_train = all_dummies[all_dummies.train_test == 1].drop(['train_test'], axis =1)
+X_test = all_dummies[all_dummies.train_test == 0].drop(['train_test'], axis =1)
+
+
+y_train = all_data[all_data.train_test==1].Survived
+y_train.shape
+```
+Then I scaled the dummies using StandardScaler(). Later on I tested the scaled versions against the normal versions and the scaled versions performed better!:
+```
+#Scaling data 
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC
+scale = StandardScaler()
+all_dummies_scaled = all_dummies.copy()
+all_dummies_scaled[['Age','norm_fare', 'FamilySize', 'IsAlone']]= scale.fit_transform(all_dummies_scaled[['Age','norm_fare','FamilySize', 'IsAlone']])
+all_dummies_scaled
 
-clf = make_pipeline(StandardScaler(), LinearSVC())
-clf.fit(train_copy[train_copy_x_bin], train_copy[Target])
-prediction = clf.predict(test[train_copy_x_bin])
+X_train_scaled = all_dummies_scaled[all_dummies_scaled.train_test == 1].drop(['train_test'], axis =1)
+X_test_scaled = all_dummies_scaled[all_dummies_scaled.train_test == 0].drop(['train_test'], axis =1)
 
-test['Survived'] = prediction
-clf.score(train_copy[train_copy_x_bin], train_copy[Target])
-acc_clf = round(clf.score(train_copy[train_copy_x_bin], train_copy[Target]) * 100, 2)
-acc_clf
+y_train = all_data[all_data.train_test==1].Survived
 ```
->79.57
-LinearSVC gave an accuracy score of 79.57% -- quite a bit worse than RandomForest
 
+## Step 6: Model Building!
 
+The main purpose of working on this project was to learn model building and model tuning, as well as ensembling methods. I used Naive Bayes, Logistic Regression, Decision Tree, K Nearest Neighbour, Random Forest, Support Vector Classifier, and Xtreme Gradient Boosting:
 
+```
+from sklearn.model_selection import cross_val_score
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+from sklearn import tree
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
+```
+I used the cross_val_score function to score each of these models.
 
+**GaussianNB:**
+```
+gnb = GaussianNB()
+cv = cross_val_score(gnb,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.70391061, 0.74157303, 0.75842697, 0.75842697, 0.79213483  
+>0.7508944824555897
 
+**Logistic Regression:**  
+```
+lr = LogisticRegression(max_iter = 2000)
+cv = cross_val_score(lr,X_train,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.81564246, 0.83707865, 0.81460674, 0.83707865, 0.84269663
+>0.8294206264515724
 
+**Logistic Regression Scaled:**
+```
+lr = LogisticRegression(max_iter = 2000)
+cv = cross_val_score(lr,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.81564246, 0.83707865, 0.81460674, 0.83707865, 0.84269663
+>0.8294206264515724
 
+**Decision Tree:**
+```
+dt = tree.DecisionTreeClassifier(random_state = 1)
+cv = cross_val_score(dt,X_train,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.76536313, 0.76966292, 0.80337079, 0.75280899, 0.78089888
+>0.7744209403050656
 
+**Decision Tree Scaled:**
+```
+dt = tree.DecisionTreeClassifier(random_state = 1)
+cv = cross_val_score(dt,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.76536313, 0.76966292, 0.80337079, 0.75280899, 0.78651685
+>0.7755445358106836  
 
+**K Nearest Neighbour:**
+```
+knn = KNeighborsClassifier()
+cv = cross_val_score(knn,X_train,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.79329609, 0.79775281, 0.79213483, 0.82022472, 0.85393258
+>0.8114682066411399  
+
+**K Nearest Neighbour Scaled:**
+```
+knn = KNeighborsClassifier()
+cv = cross_val_score(knn,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.78212291, 0.79213483, 0.85393258, 0.79213483, 0.85393258  
+>0.8148515472977215  
+
+**Random Forest:**
+```
+rf = RandomForestClassifier(random_state = 1)
+cv = cross_val_score(rf,X_train,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.81005587, 0.79213483, 0.83707865, 0.74157303, 0.84269663
+>0.8047078023978406
+
+**Random Forest Scaled:**
+```
+rf = RandomForestClassifier(random_state = 1)
+cv = cross_val_score(rf,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.81564246, 0.79213483, 0.83707865, 0.73595506, 0.84269663
+>0.8047015253279769
+
+**Support Vector Classifier (Scaled):**
+```
+svc = SVC(probability = True)
+cv = cross_val_score(svc,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.83240223, 0.82022472, 0.8258427,  0.80337079, 0.87078652
+>0.830525390747599
+
+**Xtreme Gradient Boosting (Scaled):**
+```
+xgb = XGBClassifier(random_state =1)
+cv = cross_val_score(xgb,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.80446927, 0.82022472, 0.84269663, 0.78089888, 0.83146067
+>0.8159500345238844
+
+**Voting Classifier:**
+Now I used a voting classifier. This takes all the inputs and averages the result. For a 'hard' voting classifier, each model votes on whether it thinks the person survived or not and the result is just the most popular result. For a 'soft' voting classifier each model chooses it's percentage confidence, and the result is the averages of the confidence of each of the models. 
+
+```
+from sklearn.ensemble import VotingClassifier
+voting_clf = VotingClassifier(estimators = [('lr',lr),('knn',knn),('rf',rf),('gnb',gnb),('svc',svc),('xgb',xgb)], voting = 'soft')     
+
+cv = cross_val_score(voting_clf,X_train_scaled,y_train,cv=5)
+print(cv)
+print(cv.mean())
+```
+>0.81005587, 0.80337079, 0.83146067, 0.80898876, 0.87078652
+>0.8249325214989642
+
+## Model Tuning!
+
+Next I wanted to tune the models to get a more accurate prediction. I used GridSearchCV and RandomizedSearchCV for this:
+```
+from sklearn.model_selection import GridSearchCV 
+from sklearn.model_selection import RandomizedSearchCV 
+```
+First I defined a function that would report back the best score and best parameters of each model:
+```
+#Performance reporting function
+def clf_performance(classifier, model_name):
+    print(model_name)
+    print('Best Score: ' + str(classifier.best_score_))
+    print('Best Parameters: ' + str(classifier.best_params_))
+```
+Then it was time to plug in all the models and tune away!  
+
+**Logistic Regression:**
+```
+lr = LogisticRegression()
+param_grid = {'max_iter' : [2000],
+              'penalty' : ['l1', 'l2'],
+              'C' : np.logspace(-4, 4, 20),
+              'solver' : ['liblinear']}
+
+clf_lr = GridSearchCV(lr, param_grid = param_grid, cv = 5, verbose = True, n_jobs = -1)
+best_clf_lr = clf_lr.fit(X_train_scaled,y_train)
+clf_performance(best_clf_lr,'Logistic Regression')
+```
