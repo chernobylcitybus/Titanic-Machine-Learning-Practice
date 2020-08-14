@@ -296,8 +296,8 @@ cv = cross_val_score(gnb,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.70391061, 0.74157303, 0.75842697, 0.75842697, 0.79213483  
->0.7508944824555897
+>0.7150838,  0.73595506, 0.75280899, 0.76404494, 0.80898876        
+>0.7553763103383341
 
 **Logistic Regression:**  
 ```
@@ -306,8 +306,8 @@ cv = cross_val_score(lr,X_train,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.81564246, 0.83707865, 0.81460674, 0.83707865, 0.84269663
->0.8294206264515724
+>0.81564246, 0.8258427,  0.80898876, 0.8258427,  0.84831461   
+>0.8249262444291006
 
 **Logistic Regression Scaled:**
 ```
@@ -316,8 +316,8 @@ cv = cross_val_score(lr,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.81564246, 0.83707865, 0.81460674, 0.83707865, 0.84269663
->0.8294206264515724
+>0.81564246, 0.8258427,  0.80898876, 0.8258427,  0.84831461  
+>0.8249262444291006  
 
 **Decision Tree:**
 ```
@@ -326,8 +326,8 @@ cv = cross_val_score(dt,X_train,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.76536313, 0.76966292, 0.80337079, 0.75280899, 0.78089888
->0.7744209403050656
+>0.76536313, 0.76404494, 0.81460674, 0.75842697, 0.79775281   
+>0.7800389178331555  
 
 **Decision Tree Scaled:**
 ```
@@ -336,8 +336,8 @@ cv = cross_val_score(dt,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.76536313, 0.76966292, 0.80337079, 0.75280899, 0.78651685
->0.7755445358106836  
+>0.76536313, 0.76404494, 0.81460674, 0.75842697, 0.80337079   
+>0.7811625133387735    
 
 **K Nearest Neighbour:**
 ```
@@ -346,8 +346,8 @@ cv = cross_val_score(knn,X_train,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.79329609, 0.79775281, 0.79213483, 0.82022472, 0.85393258
->0.8114682066411399  
+>0.77094972, 0.7752809,  0.79775281, 0.81460674, 0.8258427
+>0.7968865733475614  
 
 **K Nearest Neighbour Scaled:**
 ```
@@ -356,8 +356,8 @@ cv = cross_val_score(knn,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.78212291, 0.79213483, 0.85393258, 0.79213483, 0.85393258  
->0.8148515472977215  
+>0.79329609, 0.78651685, 0.81460674, 0.80898876, 0.85955056  
+>0.8125918021467579   
 
 **Random Forest:**
 ```
@@ -366,8 +366,8 @@ cv = cross_val_score(rf,X_train,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.81005587, 0.79213483, 0.83707865, 0.74157303, 0.84269663
->0.8047078023978406
+>0.82122905, 0.79775281, 0.83146067, 0.74719101, 0.8258427    
+>0.8046952482581131  
 
 **Random Forest Scaled:**
 ```
@@ -376,8 +376,8 @@ cv = cross_val_score(rf,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.81564246, 0.79213483, 0.83707865, 0.73595506, 0.84269663
->0.8047015253279769
+>0.82122905, 0.79775281, 0.83707865, 0.74719101, 0.8258427    
+>0.805818843763731  
 
 **Support Vector Classifier (Scaled):**
 ```
@@ -386,8 +386,8 @@ cv = cross_val_score(svc,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.83240223, 0.82022472, 0.8258427,  0.80337079, 0.87078652
->0.830525390747599
+>0.84357542, 0.8258427,  0.82022472, 0.80337079, 0.86516854    
+>0.8316364321134895  
 
 **Xtreme Gradient Boosting (Scaled):**
 ```
@@ -396,8 +396,8 @@ cv = cross_val_score(xgb,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.80446927, 0.82022472, 0.84269663, 0.78089888, 0.83146067
->0.8159500345238844
+>0.79888268, 0.80898876, 0.85393258, 0.78089888, 0.84269663    
+>0.817079907099366  
 
 **Voting Classifier:**
 Now I used a voting classifier. This takes all the inputs and averages the result. For a 'hard' voting classifier, each model votes on whether it thinks the person survived or not and the result is just the most popular result. For a 'soft' voting classifier each model chooses it's percentage confidence, and the result is the averages of the confidence of each of the models. 
@@ -410,8 +410,8 @@ cv = cross_val_score(voting_clf,X_train_scaled,y_train,cv=5)
 print(cv)
 print(cv.mean())
 ```
->0.81005587, 0.80337079, 0.83146067, 0.80898876, 0.87078652
->0.8249325214989642
+>0.82681564, 0.81460674, 0.8258427,  0.80337079, 0.87078652    
+>0.8282844768062269  
 
 ## Model Tuning!
 
@@ -428,7 +428,7 @@ def clf_performance(classifier, model_name):
     print('Best Score: ' + str(classifier.best_score_))
     print('Best Parameters: ' + str(classifier.best_params_))
 ```
-Then it was time to plug in all the models and tune away!  
+Then it was time to plug in all the models and tune away!    
 
 **Logistic Regression:**
 ```
@@ -442,3 +442,186 @@ clf_lr = GridSearchCV(lr, param_grid = param_grid, cv = 5, verbose = True, n_job
 best_clf_lr = clf_lr.fit(X_train_scaled,y_train)
 clf_performance(best_clf_lr,'Logistic Regression')
 ```
+>Best Score: 0.8260498399347185  
+>Best Parameters: {'C': 1.623776739188721, 'max_iter': 2000, 'penalty': 'l1', 'solver': 'liblinear'}  
+
+**K Nearest Neighbour:**
+```
+knn = KNeighborsClassifier()
+param_grid = {'n_neighbors' : [3,5,7,9],
+              'weights' : ['uniform', 'distance'],
+              'algorithm' : ['auto', 'ball_tree','kd_tree'],
+              'p' : [1,2]}
+clf_knn = GridSearchCV(knn, param_grid = param_grid, cv = 5, verbose = True, n_jobs = -1)
+best_clf_knn = clf_knn.fit(X_train_scaled,y_train)
+clf_performance(best_clf_knn,'KNN')
+```
+>Best Score: 0.8227167158370472    
+>Best Parameters: {'algorithm': 'auto', 'n_neighbors': 9, 'p': 1, 'weights': 'uniform'}  
+
+**Support Vector Classifier:**
+```
+svc = SVC(probability = True)
+param_grid = tuned_parameters = [{'kernel': ['rbf'], 'gamma': [.1,.5,1,2,5,10],
+                                  'C': [.1, 1, 10, 100, 1000]},
+                                 {'kernel': ['linear'], 'C': [.1, 1, 10, 100, 1000]},
+                                 {'kernel': ['poly'], 'degree' : [2,3,4,5], 'C': [.1, 1, 10, 100, 1000]}]
+clf_svc = GridSearchCV(svc, param_grid = param_grid, cv = 5, verbose = True, n_jobs = -1)
+best_clf_svc = clf_svc.fit(X_train_scaled,y_train)
+clf_performance(best_clf_svc,'SVC')
+```
+>Best Score: 0.8316364321134895    
+>Best Parameters: {'C': 1, 'degree': 2, 'kernel': 'poly'}  
+
+**Random Forest:**
+
+For the Random Forest and XGBoost models, I used the RandomizedSearchCV, and then fine-tuned the models with GridSearchCV to save time:  
+```
+rf = RandomForestClassifier(random_state = 1)
+param_grid =  {'n_estimators': [100,500,1000], 
+                                  'bootstrap': [True,False],
+                                  'max_depth': [3,5,10,20,50,75,100,None],
+                                  'max_features': ['auto','sqrt'],
+                                  'min_samples_leaf': [1,2,4,10],
+                                  'min_samples_split': [2,5,10]}
+                                  
+clf_rf_rnd = RandomizedSearchCV(rf, param_distributions = param_grid, n_iter = 100, cv = 5, verbose = True, n_jobs = -1)
+best_clf_rf_rnd = clf_rf_rnd.fit(X_train_scaled,y_train)
+clf_performance(best_clf_rf_rnd,'Random Forest')
+```
+>Best Score: 0.8338836231247255 
+>Best Parameters: {'n_estimators': 100, 'min_samples_split': 10, 'min_samples_leaf': 2, 'max_features': 'sqrt', 'max_depth': 75, 'bootstrap': False}  
+
+**Random Forest Fine Tuning:**
+```
+rf = RandomForestClassifier(random_state = 1)
+param_grid =  {'n_estimators': [50,100,150,200,250],
+               'criterion':['gini','entropy'],
+                                  'bootstrap': [True],
+                                  'max_depth': [70, 75, 80, 90],
+                                  'max_features': ['auto','sqrt', 10],
+                                  'min_samples_leaf': [2, 3],
+                                  'min_samples_split': [8, 9, 10, 11]}
+                                  
+clf_rf = GridSearchCV(rf, param_grid = param_grid, cv = 5, verbose = True, n_jobs = -1)
+best_clf_rf = clf_rf.fit(X_train_scaled,y_train)
+clf_performance(best_clf_rf,'Random Forest')
+```
+>Best Score: 0.8406189190885694
+>Best Parameters: {'bootstrap': True, 'criterion': 'entropy', 'max_depth': 70, 'max_features': 10, 'min_samples_leaf': 2, 'min_samples_split': 8, 'n_estimators': 100}
+
+**Xtreme Gradient Boosting:**
+```
+xgb = XGBClassifier(random_state = 1)
+
+param_grid = {
+    'n_estimators': [20, 50, 100, 250, 500,1000],
+    'colsample_bytree': [0.2, 0.5, 0.7, 0.8, 1],
+    'max_depth': [2, 5, 10, 15, 20, 25, None],
+    'reg_alpha': [0, 0.5, 1],
+    'reg_lambda': [1, 1.5, 2],
+    'subsample': [0.5,0.6,0.7, 0.8, 0.9],
+    'learning_rate':[.01,0.1,0.2,0.3,0.5, 0.7, 0.9],
+    'gamma':[0,.01,.1,1,10,100],
+    'min_child_weight':[0,.01,0.1,1,10,100],
+    'sampling_method': ['uniform', 'gradient_based']
+}
+
+clf_xgb_rnd = RandomizedSearchCV(xgb, param_distributions = param_grid, n_iter = 1000, cv = 5, verbose = True, n_jobs = -1)
+best_clf_xgb_rnd = clf_xgb_rnd.fit(X_train_scaled,y_train)
+clf_performance(best_clf_xgb_rnd,'XGB')
+```
+>Best Score: 0.8518485970748854  
+>Best Parameters: {'subsample': 0.9, 'sampling_method': 'uniform', 'reg_lambda': 2, 'reg_alpha': 0.5, 'n_estimators': 500, 'min_child_weight': 0, 'max_depth': 5, 'learning_rate': 0.5, 'gamma': 1, 'colsample_bytree': 1}  
+
+**Xtreme Gradient Boosting Fine Tuning:**
+```
+xgb = XGBClassifier(random_state = 1)
+
+param_grid = {
+    'n_estimators': [450,500,550],
+    'colsample_bytree': [0.85, 0.9, 0.95],
+    'max_depth': [4, 5, 6, 7, 8],
+    'reg_alpha': [0.5],
+    'reg_lambda': [2, 5, 10],
+    'subsample': [0.85, 0.9, .95],
+    'learning_rate':[0.5],
+    'gamma':[0.5,1,2],
+    'min_child_weight':[0],
+    'sampling_method': ['uniform']
+}
+
+clf_xgb = GridSearchCV(xgb, param_grid = param_grid, cv = 5, verbose = True, n_jobs = -1)
+best_clf_xgb = clf_xgb.fit(X_train_scaled,y_train)
+clf_performance(best_clf_xgb,'XGB')
+```
+>Best Score: 0.8563429790973573  
+>Best Parameters: {'colsample_bytree': 0.85, 'gamma': 1, 'learning_rate': 0.5, 'max_depth': 5, 'min_child_weight': 0, 'n_estimators': 550, 'reg_alpha': 0.5, 'reg_lambda': 5, 'sampling_method': 'uniform', 'subsample': 0.9}  
+
+Now I tried Ensembling. I experimented with many different types of estimators combos with hard and soft voting:
+
+```
+best_lr = best_clf_lr.best_estimator_
+best_knn = best_clf_knn.best_estimator_
+best_svc = best_clf_svc.best_estimator_
+best_rf = best_clf_rf.best_estimator_
+best_xgb = best_clf_xgb.best_estimator_
+
+voting_clf_hard = VotingClassifier(estimators = [('knn',best_knn),('rf',best_rf),('svc',best_svc)], voting = 'hard') 
+voting_clf_soft = VotingClassifier(estimators = [('knn',best_knn),('rf',best_rf),('svc',best_svc)], voting = 'soft')
+voting_clf_all = VotingClassifier(estimators = [('knn',best_knn),('rf',best_rf),('svc',best_svc), ('lr', best_lr)], voting = 'soft') 
+voting_clf_xgb = VotingClassifier(estimators = [('knn',best_knn),('rf',best_rf),('svc',best_svc), ('xgb', best_xgb),('lr', best_lr)], voting = 'soft')
+
+print('voting_clf_hard :',cross_val_score(voting_clf_hard,X_train,y_train,cv=5))
+print('voting_clf_hard mean :',cross_val_score(voting_clf_hard,X_train,y_train,cv=5).mean())
+
+print('voting_clf_soft :',cross_val_score(voting_clf_soft,X_train,y_train,cv=5))
+print('voting_clf_soft mean :',cross_val_score(voting_clf_soft,X_train,y_train,cv=5).mean())
+
+print('voting_clf_all :',cross_val_score(voting_clf_all,X_train,y_train,cv=5))
+print('voting_clf_all mean :',cross_val_score(voting_clf_all,X_train,y_train,cv=5).mean())
+
+print('voting_clf_xgb :',cross_val_score(voting_clf_xgb,X_train,y_train,cv=5))
+print('voting_clf_xgb mean :',cross_val_score(voting_clf_xgb,X_train,y_train,cv=5).mean())
+```
+>voting_clf_hard : 0.82122905, 0.80898876, 0.83146067, 0.79213483, 0.85955056  
+>voting_clf_hard mean : 0.8226727763480008  
+>voting_clf_soft : 0.81005587, 0.80898876, 0.8258427,  0.82022472, 0.85393258  
+>voting_clf_soft mean : 0.8238089259933463  
+>voting_clf_all : 0.83240223, 0.80898876, 0.80898876, 0.8258427,  0.87078652  
+>voting_clf_all mean : 0.8294017952419811  
+>voting_clf_xgb : 0.83798883, 0.83146067, 0.84831461, 0.8258427,  0.86516854  
+>voting_clf_xgb mean : 0.840631473228297  
+
+Soft voting also lets you choose different weights for each of the models, so I also tested to see which weighting was best, and it turns out the original 1, 1, 1, waiting was already perfect.
+
+```
+params = {'weights' : [[1,1,1],[1,2,1],[1,1,2],[2,1,1],[2,2,1],[1,2,2],[2,1,2]]}
+
+vote_weight = GridSearchCV(voting_clf_soft, param_grid = params, cv = 5, verbose = True, n_jobs = -1)
+best_clf_weight = vote_weight.fit(X_train_scaled,y_train)
+clf_performance(best_clf_weight,'VC Weights')
+voting_clf_sub = best_clf_weight.best_estimator_.predict(X_test_scaled)
+```
+>Best Score: 0.8327600276191074  
+>Best Parameters: {'weights': 1, 1, 1}
+
+Next I made my predictions:
+```
+#Make Predictions 
+voting_clf_hard.fit(X_train_scaled, y_train)
+voting_clf_soft.fit(X_train_scaled, y_train)
+voting_clf_all.fit(X_train_scaled, y_train)
+voting_clf_xgb.fit(X_train_scaled, y_train)
+
+best_rf.fit(X_train_scaled, y_train)
+y_hat_vc_hard = voting_clf_hard.predict(X_test_scaled).astype(int)
+y_hat_rf = best_rf.predict(X_test_scaled).astype(int)
+y_hat_vc_soft =  voting_clf_soft.predict(X_test_scaled).astype(int)
+y_hat_vc_all = voting_clf_all.predict(X_test_scaled).astype(int)
+y_hat_vc_xgb = voting_clf_xgb.predict(X_test_scaled).astype(int)
+```
+After submission, the winner of 'best model' was surprising a tie!
+
+The 'hard' voting classifier tied with 'Random Forest' with an accuracy of 78.468%, which scored in the top 20% of the leaderboard!
+
